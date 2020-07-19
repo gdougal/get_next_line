@@ -12,49 +12,48 @@
 
 #include "get_next_line.h"
 
-t_list	*ft_lstnew(int key, void *content)
-{
-	t_list	*lst;
-
-	if (!(lst = (t_list*)malloc(sizeof(t_list))))
-		return (NULL);
-	lst->key = key;
-	lst->content = content;
-	lst->next = NULL;
-	return (lst);
-}
-
-void	ft_lstadd_front(t_list **lst, t_list *new)
-{
-	if (new && lst)
-	{
-		new->next = *lst;
-		*lst = new;
-	}
-}
-
 int	get_next_line(int fd, char **line)
 {
 	char            r_tmp[BUFFER_SIZE + 1];
-	static t_list   *rms;
+	static char     *rms = NULL;
 	int             res_read;
 	char            *start;
+	char            *tmp;
 
 	if (fd < 0 || BUFFER_SIZE < 1 || line == NULL)
 		return (-1);
 	start = NULL;
-	*line = ft_strdup("");
-	if(rms->content)
-		*line = ft_strjoin(*line, rms->content);
+	if(rms)
+	{
+		if((start = ft_strchr(rms, '\n')))
+		{
+			*start = '\0';
+			*line = ft_strdup(rms);
+			tmp = rms;
+			rms = ft_strdup(start + 1);
+			free(tmp);
+		}
+		else
+		{
+			*line = ft_strdup(rms);
+			free(rms);
+			rms = NULL;
+		}
+	}
+	else
+		*line = ft_strdup("");
+
 	while(!start && (res_read = read(fd, r_tmp, BUFFER_SIZE)))
 	{
 		r_tmp[res_read] = '\0';
 		if((start = ft_strchr(r_tmp, '\n')))
 		{
 			*start = '\0';
-			rms = ft_lstnew(fd, ft_strdup(start + 1));
+			rms = ft_strdup(start + 1);
 		}
+		tmp = *line;
 		*line = ft_strjoin(*line, r_tmp);
+		free(tmp);
 	}
 	return (0);
 }
