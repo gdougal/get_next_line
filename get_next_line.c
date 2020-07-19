@@ -12,13 +12,15 @@
 
 #include "get_next_line.h"
 
-static char			*tail(char *start, char **line, char **rms)
+static char			*tail(char **line, char **rms)
 {
-	char            *tmp;
+	char			*tmp;
+	char			*start;
 
-	if(*rms)
+	start = NULL;
+	if (*rms)
 	{
-		if((start = ft_strchr(*rms, '\n')))
+		if ((start = ft_strchr(*rms, '\n')))
 		{
 			*start = '\0';
 			*line = ft_strdup(*rms);
@@ -38,18 +40,17 @@ static char			*tail(char *start, char **line, char **rms)
 	return (start);
 }
 
-int                 get_next_line(int fd, char **line)
+int					get_next_line(int fd, char **line)
 {
-	char            r_tmp[BUFFER_SIZE + 1];
-	static char     *rms;
-	int             res_read;
-	char            *start;
-	char            *tmp;
+	char			r_tmp[BUFFER_SIZE + 1];
+	static char		*rms;
+	int				res_read;
+	char			*start;
+	char			*tmp;
 
-	start = NULL;
 	if (read(fd, r_tmp, 0) < 0 || BUFFER_SIZE < 1 || line == NULL)
 		return (-1);
-	start = tail(start, line, &rms);
+	start = tail(line, &rms);
 	while(!start && (res_read = read(fd, r_tmp, BUFFER_SIZE)))
 	{
 		r_tmp[res_read] = '\0';
